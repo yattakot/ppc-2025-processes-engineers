@@ -1,9 +1,12 @@
 #include "kulikov_d_coun_number_char/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
+#include <algorithm>
 
 #include <numeric>
 #include <vector>
+#include <cstddef>
+#include <functional>
 
 #include "kulikov_d_coun_number_char/common/include/common.hpp"
 #include "util/include/util.hpp"
@@ -17,56 +20,49 @@ KulikovDiffCountNumberCharMPI::KulikovDiffCountNumberCharMPI(const InType &in) {
 }
 
 bool KulikovDiffCountNumberCharMPI::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  return (GetOutput() == 0);
 }
 
 bool KulikovDiffCountNumberCharMPI::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 bool KulikovDiffCountNumberCharMPI::RunImpl() {
-  auto input = GetInput();
-  if (input == 0) {
-    return false;
-  }
+    size_t shorter_len = 0;
+    size_t longer_len = 0;
 
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
-      }
-    }
-  }
-
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int rank = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  if (rank == 0) {
-    GetOutput() /= num_threads;
-  } else {
-    int counter = 0;
-    for (int i = 0; i < num_threads; i++) {
-      counter++;
+    if (proc_rank_ == 0) {
+        const auto &[first_str, second_str] = GetInput();
+        shorter_len = std::min(first_str.size(), second_str.size());
+        longer_len = std::max(first_str.size(), second_str.size());
     }
 
-    if (counter != 0) {
-      GetOutput() /= counter;
-    }
-  }
+    MPI_Bcast(&shorter_len, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&longer_len, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
 
-  MPI_Barrier(MPI_COMM_WORLD);
-  return GetOutput() > 0;
+    std::vector<char> chunk1;
+    std::vector<char> chunk2;
+
+    // раздаем участки строк всем процессам
+    DistributeData(shorter_len, chunk1, chunk2);
+
+    int local_mismatches = 0;
+    for (size_t i = 0; i < chunk1.size(); ++i) {
+        if (chunk1[i] != chunk2[i]) {
+            local_mismatches++;
+        }
+    }
+
+    int total_mismatches = 0;
+    MPI_Allreduce(&local_mismatches, &total_mismatches, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+
+    GetOutput() = total_mismatches + static_cast<int>(longer_len - shorter_len);
+
+    return true;
 }
 
 bool KulikovDiffCountNumberCharMPI::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 }  // namespace kulikov_d_coun_number_char
