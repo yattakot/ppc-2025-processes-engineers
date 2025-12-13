@@ -29,7 +29,7 @@ TEST_P(ExampleRunPerfTestProcesses3, RunPerfModes) {
 }
 
 const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, NesterovATestTaskMPI, NesterovATestTaskSEQ>(PPC_SETTINGS_example_processes_3);
+    ppc::util::MakeAllPerfTasks<InType, KulikovDiffCountNumberCharMPI, NesterovATestTaskSEQ>(PPC_SETTINGS_example_processes_3);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 

@@ -29,7 +29,7 @@ TEST_P(KulikovDCounNumberCharPerfTests, RunPerfModes) {
 }
 
 const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, NesterovATestTaskMPI, NesterovATestTaskSEQ>(PPC_SETTINGS_kulikov_d_coun_number_char);
+    ppc::util::MakeAllPerfTasks<InType, KulikovDiffCountNumberCharMPI, NesterovATestTaskSEQ>(PPC_SETTINGS_kulikov_d_coun_number_char);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
