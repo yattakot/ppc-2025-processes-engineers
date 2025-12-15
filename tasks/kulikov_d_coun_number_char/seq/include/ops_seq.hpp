@@ -5,12 +5,12 @@
 
 namespace kulikov_d_coun_number_char {
 
-class NesterovATestTaskSEQ : public BaseTask {
+class KulikovDiffCountNumberCharSEQ : public BaseTask {
  public:
   static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
     return ppc::task::TypeOfTask::kSEQ;
   }
-  explicit NesterovATestTaskSEQ(const InType &in);
+  explicit KulikovDiffCountNumberCharSEQ(const InType &in);
 
  private:
   bool ValidationImpl() override;

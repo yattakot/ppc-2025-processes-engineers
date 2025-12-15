@@ -1,60 +1,52 @@
 #include "kulikov_d_coun_number_char/seq/include/ops_seq.hpp"
 
+#include <algorithm>
 #include <numeric>
-#include <vector>
+#include <string>
 
 #include "kulikov_d_coun_number_char/common/include/common.hpp"
 #include "util/include/util.hpp"
 
 namespace kulikov_d_coun_number_char {
 
-NesterovATestTaskSEQ::NesterovATestTaskSEQ(const InType &in) {
+KulikovDiffCountNumberCharSEQ::KulikovDiffCountNumberCharSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
 
-bool NesterovATestTaskSEQ::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+bool KulikovDiffCountNumberCharSEQ::ValidationImpl() {
+  const auto &[s1, s2] = GetInput();
+  return (!s1.empty() || !s2.empty());
 }
 
-bool NesterovATestTaskSEQ::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+bool KulikovDiffCountNumberCharSEQ::PreProcessingImpl() {
+  return true;
 }
 
-bool NesterovATestTaskSEQ::RunImpl() {
-  if (GetInput() == 0) {
-    return false;
-  }
+bool KulikovDiffCountNumberCharSEQ::RunImpl() {
+  const auto &[s1, s2] = GetInput();
 
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
-      }
+  size_t min_len = std::min(s1.size(), s2.size());
+  size_t max_len = std::max(s1.size(), s2.size());
+
+  int diff_count = 0;
+
+  // cчитаем несовпадения по общему диапазону
+  for (size_t i = 0; i < min_len; ++i) {
+    if (s1[i] != s2[i]) {
+      diff_count++;
     }
   }
 
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
+  diff_count += static_cast<int>(max_len - min_len);
 
-  int counter = 0;
-  for (int i = 0; i < num_threads; i++) {
-    counter++;
-  }
-
-  if (counter != 0) {
-    GetOutput() /= counter;
-  }
-  return GetOutput() > 0;
+  GetOutput() = diff_count;
+  return true;
 }
 
-bool NesterovATestTaskSEQ::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+bool KulikovDiffCountNumberCharSEQ::PostProcessingImpl() {
+  return true;
 }
 
 }  // namespace kulikov_d_coun_number_char

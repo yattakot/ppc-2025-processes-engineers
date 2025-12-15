@@ -13,6 +13,9 @@ class KulikovDiffCountNumberCharMPI : public BaseTask {
   explicit KulikovDiffCountNumberCharMPI(const InType &in);
 
  private:
+  int proc_rank_{0};
+  int proc_size_{1};
+
   bool ValidationImpl() override;
   bool PreProcessingImpl() override;
   bool RunImpl() override;
