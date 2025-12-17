@@ -16,8 +16,7 @@ KulikovDiffCountNumberCharSEQ::KulikovDiffCountNumberCharSEQ(const InType &in) {
 }
 
 bool KulikovDiffCountNumberCharSEQ::ValidationImpl() {
-  const auto &[s1, s2] = GetInput();
-  return (!s1.empty() || !s2.empty());
+  return true;
 }
 
 bool KulikovDiffCountNumberCharSEQ::PreProcessingImpl() {

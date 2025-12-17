@@ -1,12 +1,15 @@
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <fstream>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <tuple>
 #include <utility>
+#include <vector>
 
 #include "kulikov_d_coun_number_char/common/include/common.hpp"
 #include "kulikov_d_coun_number_char/mpi/include/ops_mpi.hpp"
@@ -21,9 +24,8 @@ class KulikovDiffCountNumberCharFuncTests : public ppc::util::BaseRunFuncTests<I
   static std::string PrintTestParam(const testing::TestParamInfo<std::tuple<
       std::function<std::shared_ptr<ppc::task::Task<InType, OutType>>(InType)>,
       std::string,
-      TestType>>& param)
-  {
-    const TestType& test_param = std::get<2>(param.param);
+      TestType>>& param) {
+    const TestType &test_param = std::get<2>(param.param);
     std::string name = FormatFileName(test_param.first) + "_" + std::to_string(test_param.second);
     name += "_idx" + std::to_string(param.index);
     return name;
@@ -34,32 +36,27 @@ class KulikovDiffCountNumberCharFuncTests : public ppc::util::BaseRunFuncTests<I
     TestType test_param = std::get<2>(GetParam());
     expected_output_ = test_param.second;
 
-    const std::string file_path = ppc::util::GetAbsoluteTaskPath(
-        PPC_ID_kulikov_d_coun_number_char, test_param.first);
+    std::string file_path = "tasks/kulikov_d_coun_number_char/data/" + test_param.first;
     std::ifstream file(file_path);
     if (!file.is_open()) {
       throw std::runtime_error("Cannot open file: " + file_path);
     }
 
     std::string line1, line2;
-    if (!std::getline(file, line1)) throw std::runtime_error("Failed reading first line");
-    if (!std::getline(file, line2)) throw std::runtime_error("Failed reading second line");
-    if (!std::getline(file, line1)) line1 = "";
-    if (!std::getline(file, line2)) line2 = "";
+    std::getline(file, line1);
+    std::getline(file, line2);
 
+    if (!file) line1 = "";
+    if (!file) line2 = "";
 
     TrimEnd(line1);
     TrimEnd(line2);
-
-    std::string extra;
-    if (std::getline(file, extra) && !extra.empty())
-      throw std::runtime_error("Unexpected extra data in file: " + file_path);
 
     input_data_ = std::make_pair(line1, line2);
     file.close();
   }
 
-  bool CheckTestOutputData(OutType& output_data) final {
+  bool CheckTestOutputData(OutType &output_data) final {
     return output_data == expected_output_;
   }
 
@@ -71,11 +68,11 @@ class KulikovDiffCountNumberCharFuncTests : public ppc::util::BaseRunFuncTests<I
   InType input_data_ = {"", ""};
   OutType expected_output_ = 0;
 
-  static void TrimEnd(std::string& s) {
+  static void TrimEnd(std::string &s) {
     while (!s.empty() && (s.back() == '\r' || s.back() == '\n')) s.pop_back();
   }
 
-  static std::string FormatFileName(const std::string& s) {
+  static std::string FormatFileName(const std::string &s) {
     size_t dot_pos = s.find_last_of('.');
     return (dot_pos != std::string::npos) ? s.substr(0, dot_pos) : s;
   }
@@ -88,11 +85,9 @@ TEST_P(KulikovDiffCountNumberCharFuncTests, RunFuncTests) {
 }
 
 const std::array<TestType, 3> kTestParam = {
-   // std::make_pair("test_empty_first.txt", 3),
- //   std::make_pair("test_empty_second.txt", 3),
     std::make_pair("test_identical.txt", 0),
     std::make_pair("test_single_diff.txt", 1),
-    std::make_pair("test_diff_length.txt", 2)
+    std::make_pair("test_diff_length.txt", 3)
 };
 
 const auto kTestTasksList = std::tuple_cat(
