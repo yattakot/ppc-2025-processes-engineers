@@ -17,8 +17,8 @@ using OutType = int;
 class KulikovDiffCountNumberCharPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
  protected:
   static constexpr size_t kSize = 200000000;
-  InType input_data;
-  OutType expected_result;
+  InType input_data{};
+  OutType expected_result{};
 
   void SetUp() override {
     std::string s1(kSize, 'a');

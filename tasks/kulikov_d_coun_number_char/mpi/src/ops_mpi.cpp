@@ -4,10 +4,9 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <vector>
+#include <string>
 
 #include "kulikov_d_coun_number_char/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace kulikov_d_coun_number_char {
 
@@ -29,7 +28,8 @@ bool KulikovDiffCountNumberCharMPI::PreProcessingImpl() {
 }
 
 bool KulikovDiffCountNumberCharMPI::RunImpl() {
-  std::string s1, s2;
+  std::string s1;
+  std::string s2;
 
   if (proc_rank_ == 0) {
     const auto &input = GetInput();
@@ -45,15 +45,15 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
   s1.resize(len1);
   s2.resize(len2);
 
-  MPI_Bcast(s1.data(), len1, MPI_CHAR, 0, MPI_COMM_WORLD);
-  MPI_Bcast(s2.data(), len2, MPI_CHAR, 0, MPI_COMM_WORLD);
+  MPI_Bcast(s1.data(), static_cast<int>(len1), MPI_CHAR, 0, MPI_COMM_WORLD);
+  MPI_Bcast(s2.data(), static_cast<int>(len2), MPI_CHAR, 0, MPI_COMM_WORLD);
 
   const size_t min_len = std::min(len1, len2);
   const size_t max_len = std::max(len1, len2);
 
   const size_t base = min_len / proc_size_;
   const size_t rem = min_len % proc_size_;
-  const size_t begin = proc_rank_ * base + std::min(static_cast<size_t>(proc_rank_), rem);
+  const size_t begin = (static_cast<size_t>(proc_rank_) * base) + std::min(static_cast<size_t>(proc_rank_), rem);
   const size_t end = begin + base + (static_cast<size_t>(proc_rank_) < rem ? 1 : 0);
 
   int local_diff = 0;
