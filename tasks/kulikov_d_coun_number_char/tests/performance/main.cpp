@@ -14,7 +14,7 @@ using OutType = int;
 
 class KulikovDiffCountNumberCharPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
 protected:
-    static constexpr size_t kSize = 100000000;
+    static constexpr size_t kSize = 200000000;
     InType input_data_{};
     OutType expected_result_{};
 
@@ -39,6 +39,7 @@ protected:
         return input_data_;
     }
 };
+
 
 TEST_P(KulikovDiffCountNumberCharPerfTests, RunPerfModes) {
     ExecuteTest(GetParam());
