@@ -18,10 +18,8 @@ class KulikovDiffCountNumberCharPerfTests : public ppc::util::BaseRunPerfTests<I
  protected:
   static constexpr size_t kSize = 200000000;
 
-  KulikovDiffCountNumberCharPerfTests() : expected_result(0) {}
-
   InType input_data;
-  OutType expected_result;
+  OutType expected_result{};
 
   void SetUp() override {
     std::string s1(kSize, 'a');
