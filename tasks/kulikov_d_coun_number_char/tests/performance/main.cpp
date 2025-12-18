@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+
 #include <string>
 #include <utility>
 
@@ -13,43 +14,40 @@ using InType = std::pair<std::string, std::string>;
 using OutType = int;
 
 class KulikovDiffCountNumberCharPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
-protected:
-    static constexpr size_t kSize = 200000000;
-    InType input_data_{};
-    OutType expected_result_{};
+ protected:
+  static constexpr size_t kSize = 200000000;
+  InType input_data_{};
+  OutType expected_result_{};
 
-    void SetUp() override {
-        std::string s1(kSize, 'a');
-        std::string s2(kSize, 'a');
+  void SetUp() override {
+    std::string s1(kSize, 'a');
+    std::string s2(kSize, 'a');
 
-        for (size_t i = 0; i < kSize; i += 10000000) {
-            s2[i] = 'b';
-        }
-
-        input_data_ = std::make_pair(std::move(s1), std::move(s2));
-
-        expected_result_ = static_cast<OutType>(kSize / 10000000);
+    for (size_t i = 0; i < kSize; i += 10000000) {
+      s2[i] = 'b';
     }
 
-    bool CheckTestOutputData(OutType &output_data) final {
-        return expected_result_ == output_data;
-    }
+    input_data_ = std::make_pair(std::move(s1), std::move(s2));
 
-    InType GetTestInputData() final {
-        return input_data_;
-    }
+    expected_result_ = static_cast<OutType>(kSize / 10000000);
+  }
+
+  bool CheckTestOutputData(OutType &output_data) final {
+    return expected_result_ == output_data;
+  }
+
+  InType GetTestInputData() final {
+    return input_data_;
+  }
 };
 
-
 TEST_P(KulikovDiffCountNumberCharPerfTests, RunPerfModes) {
-    ExecuteTest(GetParam());
+  ExecuteTest(GetParam());
 }
 
-const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<
-    InType,
-    KulikovDiffCountNumberCharMPI,
-    KulikovDiffCountNumberCharSEQ
->(PPC_SETTINGS_kulikov_d_coun_number_char);
+const auto kAllPerfTasks =
+    ppc::util::MakeAllPerfTasks<InType, KulikovDiffCountNumberCharMPI, KulikovDiffCountNumberCharSEQ>(
+        PPC_SETTINGS_kulikov_d_coun_number_char);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
