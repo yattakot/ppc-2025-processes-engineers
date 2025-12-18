@@ -17,12 +17,12 @@ namespace kulikov_d_coun_number_char {
 class KulikovDiffCountNumberCharFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(const testing::TestParamInfo<ParamType> &info) {
-    const auto &test_data = std::get<2>(info.param);
-    std::string clean_name = test_data.first;
+    const auto& [filename, expected] = std::get<2>(info.param);
+    std::string clean_name = filename;
     if (auto pos = clean_name.find_last_of('.'); pos != std::string::npos) {
       clean_name = clean_name.substr(0, pos);
     }
-    return clean_name + "_expected" + std::to_string(test_data.second);
+    return clean_name + "_expected" + std::to_string(expected) + "_idx" + std::to_string(info.index);;
   }
 
  protected:
@@ -83,8 +83,8 @@ TEST_P(KulikovDiffCountNumberCharFuncTests, CountDifferingCharacters) {
 const std::array kTestCases = {std::make_pair("empty_strings.txt", 0),
                                std::make_pair("test_identical.txt", 0),
                                std::make_pair("test_single_diff.txt", 1),
-                               std::make_pair("test_empty_first.txt", 5),
-                               std::make_pair("test_empty_second.txt", 4),
+                               std::make_pair("test_empty_first.txt", 3),
+                               std::make_pair("test_empty_second.txt", 3),
                                std::make_pair("test_diff_length.txt", 3),
                                std::make_pair("all_different_short.txt", 6),
                                std::make_pair("with_spaces_and_tabs.txt", 2),

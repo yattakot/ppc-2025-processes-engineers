@@ -21,12 +21,7 @@ KulikovDiffCountNumberCharMPI::KulikovDiffCountNumberCharMPI(const InType &in) {
 }
 
 bool KulikovDiffCountNumberCharMPI::ValidationImpl() {
-  if (proc_rank_ != 0) {
-    return true;
-  }
-
-  const auto &[first, second] = GetInput();
-  return (!first.empty() || !second.empty());
+  return true;
 }
 
 bool KulikovDiffCountNumberCharMPI::PreProcessingImpl() {
@@ -34,27 +29,34 @@ bool KulikovDiffCountNumberCharMPI::PreProcessingImpl() {
 }
 
 bool KulikovDiffCountNumberCharMPI::RunImpl() {
-  size_t min_len = 0;
-  size_t max_len = 0;
+  std::string s1, s2;
 
   if (proc_rank_ == 0) {
-    const auto &[s1, s2] = GetInput();
-    min_len = std::min(s1.size(), s2.size());
-    max_len = std::max(s1.size(), s2.size());
+    const auto& input = GetInput();
+    s1 = input.first;
+    s2 = input.second;
   }
 
-  MPI_Bcast(&min_len, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&max_len, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+  size_t len1 = s1.size();
+  size_t len2 = s2.size();
+  MPI_Bcast(&len1, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&len2, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+
+  s1.resize(len1);
+  s2.resize(len2);
+
+  MPI_Bcast(s1.data(), len1, MPI_CHAR, 0, MPI_COMM_WORLD);
+  MPI_Bcast(s2.data(), len2, MPI_CHAR, 0, MPI_COMM_WORLD);
+
+  const size_t min_len = std::min(len1, len2);
+  const size_t max_len = std::max(len1, len2);
 
   const size_t base = min_len / proc_size_;
   const size_t rem = min_len % proc_size_;
-
   const size_t begin = proc_rank_ * base + std::min(static_cast<size_t>(proc_rank_), rem);
   const size_t end = begin + base + (proc_rank_ < rem ? 1 : 0);
 
   int local_diff = 0;
-
-  const auto &[s1, s2] = GetInput();
   for (size_t i = begin; i < end; ++i) {
     if (s1[i] != s2[i]) {
       local_diff++;
@@ -65,7 +67,6 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
   MPI_Allreduce(&local_diff, &global_diff, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
   GetOutput() = global_diff + static_cast<int>(max_len - min_len);
-
   return true;
 }
 
