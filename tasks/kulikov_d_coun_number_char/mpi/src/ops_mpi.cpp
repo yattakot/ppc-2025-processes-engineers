@@ -32,7 +32,7 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
   std::string s1, s2;
 
   if (proc_rank_ == 0) {
-    const auto& input = GetInput();
+    const auto &input = GetInput();
     s1 = input.first;
     s2 = input.second;
   }

@@ -17,12 +17,13 @@ namespace kulikov_d_coun_number_char {
 class KulikovDiffCountNumberCharFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(const testing::TestParamInfo<ParamType> &info) {
-    const auto& [filename, expected] = std::get<2>(info.param);
+    const auto &[filename, expected] = std::get<2>(info.param);
     std::string clean_name = filename;
     if (auto pos = clean_name.find_last_of('.'); pos != std::string::npos) {
       clean_name = clean_name.substr(0, pos);
     }
-    return clean_name + "_expected" + std::to_string(expected) + "_idx" + std::to_string(info.index);;
+    return clean_name + "_expected" + std::to_string(expected) + "_idx" + std::to_string(info.index);
+    ;
   }
 
  protected:
