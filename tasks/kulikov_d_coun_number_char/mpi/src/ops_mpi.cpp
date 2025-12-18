@@ -54,7 +54,7 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
   const size_t base = min_len / proc_size_;
   const size_t rem = min_len % proc_size_;
   const size_t begin = proc_rank_ * base + std::min(static_cast<size_t>(proc_rank_), rem);
-  const size_t end = begin + base + (proc_rank_ < rem ? 1 : 0);
+  const size_t end = begin + base + (static_cast<size_t>(proc_rank_) < rem ? 1 : 0);
 
   int local_diff = 0;
   for (size_t i = begin; i < end; ++i) {
