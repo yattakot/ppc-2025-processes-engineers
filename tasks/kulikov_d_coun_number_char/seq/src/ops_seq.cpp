@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cstddef>
 
-
 #include "kulikov_d_coun_number_char/common/include/common.hpp"
 
 namespace kulikov_d_coun_number_char {

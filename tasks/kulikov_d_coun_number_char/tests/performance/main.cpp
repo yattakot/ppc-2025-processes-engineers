@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <string>
 #include <utility>
-#include <cstddef>
 
 #include "kulikov_d_coun_number_char/common/include/common.hpp"
 #include "kulikov_d_coun_number_char/mpi/include/ops_mpi.hpp"
