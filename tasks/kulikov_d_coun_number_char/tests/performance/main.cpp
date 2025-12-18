@@ -2,6 +2,7 @@
 
 #include <string>
 #include <utility>
+#include <cstddef>
 
 #include "kulikov_d_coun_number_char/common/include/common.hpp"
 #include "kulikov_d_coun_number_char/mpi/include/ops_mpi.hpp"
@@ -16,8 +17,8 @@ using OutType = int;
 class KulikovDiffCountNumberCharPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
  protected:
   static constexpr size_t kSize = 200000000;
-  InType input_data_{};
-  OutType expected_result_{};
+  InType input_data;
+  OutType expected_result;
 
   void SetUp() override {
     std::string s1(kSize, 'a');
@@ -27,17 +28,17 @@ class KulikovDiffCountNumberCharPerfTests : public ppc::util::BaseRunPerfTests<I
       s2[i] = 'b';
     }
 
-    input_data_ = std::make_pair(std::move(s1), std::move(s2));
+    input_data = std::make_pair(std::move(s1), std::move(s2));
 
-    expected_result_ = static_cast<OutType>(kSize / 10000000);
+    expected_result = static_cast<OutType>(kSize / 10000000);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return expected_result_ == output_data;
+    return expected_result == output_data;
   }
 
   InType GetTestInputData() final {
-    return input_data_;
+    return input_data;
   }
 };
 

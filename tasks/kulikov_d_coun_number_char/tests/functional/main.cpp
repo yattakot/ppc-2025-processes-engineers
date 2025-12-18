@@ -29,7 +29,7 @@ class KulikovDiffCountNumberCharFuncTests : public ppc::util::BaseRunFuncTests<I
  protected:
   void SetUp() override {
     const auto &[filename, expected] = std::get<2>(GetParam());
-    expected_output_ = expected;
+    expected_output = expected;
 
     std::string full_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_kulikov_d_coun_number_char, filename);
 
@@ -38,7 +38,8 @@ class KulikovDiffCountNumberCharFuncTests : public ppc::util::BaseRunFuncTests<I
       throw std::runtime_error("Test file not found: " + full_path);
     }
 
-    std::string first_line, second_line;
+    std::string first_line;
+    std::string second_line;
     if (!std::getline(input_file, first_line)) {
       throw std::runtime_error("Empty or unreadable first line in: " + filename);
     }
@@ -59,20 +60,20 @@ class KulikovDiffCountNumberCharFuncTests : public ppc::util::BaseRunFuncTests<I
       throw std::runtime_error("Extra content found in test file: " + filename);
     }
 
-    input_data_ = {std::move(first_line), std::move(second_line)};
+    input_data = {std::move(first_line), std::move(second_line)};
   }
 
   bool CheckTestOutputData(OutType &result) final {
-    return result == expected_output_;
+    return result == expected_output;
   }
 
   InType GetTestInputData() final {
-    return input_data_;
+    return input_data;
   }
 
  private:
-  InType input_data_;
-  OutType expected_output_ = 0;
+  InType input_data;
+  OutType expected_output = 0;
 };
 
 namespace {
