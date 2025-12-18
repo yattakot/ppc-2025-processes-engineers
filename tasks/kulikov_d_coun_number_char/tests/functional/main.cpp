@@ -23,7 +23,6 @@ class KulikovDiffCountNumberCharFuncTests : public ppc::util::BaseRunFuncTests<I
       clean_name = clean_name.substr(0, pos);
     }
     return clean_name + "_expected" + std::to_string(expected) + "_idx" + std::to_string(info.index);
-
   }
 
  protected:

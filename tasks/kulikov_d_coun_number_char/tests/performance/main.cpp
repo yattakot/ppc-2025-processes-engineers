@@ -20,7 +20,6 @@ class KulikovDiffCountNumberCharPerfTests : public ppc::util::BaseRunPerfTests<I
 
   KulikovDiffCountNumberCharPerfTests() : expected_result(0) {}
 
-
   InType input_data;
   OutType expected_result;
 
