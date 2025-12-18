@@ -29,7 +29,7 @@ bool KulikovDiffCountNumberCharSEQ::RunImpl() {
 
   int diff_count = 0;
 
-  // cчитаем несовпадения по  диапазону
+  // cчитаем несовпадения по диапазону
   for (size_t i = 0; i < min_len; ++i) {
     if (s1[i] != s2[i]) {
       diff_count++;
