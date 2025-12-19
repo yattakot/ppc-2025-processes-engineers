@@ -81,7 +81,6 @@ TEST_P(KulikovDiffCountNumberCharFuncTests, CountDifferingCharacters) {
   ExecuteTest(GetParam());
 }
 
-
 const std::array kTestCases = {std::make_pair("empty_strings.txt", 0),
                                std::make_pair("test_identical.txt", 0),
                                std::make_pair("test_single_diff.txt", 1),
