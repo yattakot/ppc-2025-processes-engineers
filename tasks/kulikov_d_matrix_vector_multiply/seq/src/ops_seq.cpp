@@ -15,12 +15,29 @@ KulikovDMatrixMultiplySEQ::KulikovDMatrixMultiplySEQ(const InType &in) {
 }
 
 bool KulikovDMatrixMultiplySEQ::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  const auto& input = GetInput();
+
+  if (input.rows <= 0 || input.cols <= 0) {
+    return false;
+  }
+
+  if (input.matrix.size() != static_cast<size_t>(input.rows * input.cols)) {
+    return false;
+  }
+
+  if (input.vector.size() != static_cast<size_t>(input.cols)) {
+    return false;
+  }
+
+  return GetOutput().empty();
 }
 
 bool KulikovDMatrixMultiplySEQ::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  const auto& input = GetInput();
+
+  GetOutput().assign(input.rows, 0);
+
+  return true;
 }
 
 bool KulikovDMatrixMultiplySEQ::RunImpl() {
@@ -53,8 +70,7 @@ bool KulikovDMatrixMultiplySEQ::RunImpl() {
 }
 
 bool KulikovDMatrixMultiplySEQ::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 }  // namespace kulikov_d_matrix_vector_multiply

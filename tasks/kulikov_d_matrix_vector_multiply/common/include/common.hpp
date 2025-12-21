@@ -7,8 +7,17 @@
 
 namespace kulikov_d_matrix_vector_multiply {
 
-using InType = int;
-using OutType = int;
+using ValueType = int;
+
+struct MatrixVectorInput {
+  int rows;
+  int cols;
+  std::vector<ValueType> matrix;
+  std::vector<ValueType> vector;
+};
+
+using InType = MatrixVectorInput;
+using OutType = std::vector<ValueType>;
 using TestType = std::tuple<int, std::string>;
 using BaseTask = ppc::task::Task<InType, OutType>;
 

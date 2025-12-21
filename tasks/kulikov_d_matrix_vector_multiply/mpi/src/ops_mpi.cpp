@@ -16,8 +16,22 @@ KulikovDMatrixMultiplyMPI::KulikovDMatrixMultiplyMPI(const InType &in) {
   GetOutput() = 0;
 }
 
-bool KulikovDMatrixMultiplyMPI::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+bool KulikovDMatrixMultiplySEQ::ValidationImpl() {
+  const auto& input = GetInput();
+
+  if (input.rows <= 0 || input.cols <= 0) {
+    return false;
+  }
+
+  if (input.matrix.size() != static_cast<size_t>(input.rows * input.cols)) {
+    return false;
+  }
+
+  if (input.vector.size() != static_cast<size_t>(input.cols)) {
+    return false;
+  }
+
+  return GetOutput().empty();
 }
 
 bool KulikovDMatrixMultiplyMPI::PreProcessingImpl() {
