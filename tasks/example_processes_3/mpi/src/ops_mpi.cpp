@@ -10,22 +10,22 @@
 
 namespace nesterov_a_test_task_processes_3 {
 
-KulikovDiffCountNumberCharMPI::KulikovDiffCountNumberCharMPI(const InType &in) {
+NesterovATestTaskMPI::NesterovATestTaskMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
 
-bool KulikovDiffCountNumberCharMPI::ValidationImpl() {
+bool NesterovATestTaskMPI::ValidationImpl() {
   return (GetInput() > 0) && (GetOutput() == 0);
 }
 
-bool KulikovDiffCountNumberCharMPI::PreProcessingImpl() {
+bool NesterovATestTaskMPI::PreProcessingImpl() {
   GetOutput() = 2 * GetInput();
   return GetOutput() > 0;
 }
 
-bool KulikovDiffCountNumberCharMPI::RunImpl() {
+bool NesterovATestTaskMPI::RunImpl() {
   auto input = GetInput();
   if (input == 0) {
     return false;
@@ -64,7 +64,7 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
   return GetOutput() > 0;
 }
 
-bool KulikovDiffCountNumberCharMPI::PostProcessingImpl() {
+bool NesterovATestTaskMPI::PostProcessingImpl() {
   GetOutput() -= GetInput();
   return GetOutput() > 0;
 }

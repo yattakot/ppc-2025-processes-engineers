@@ -5,12 +5,12 @@
 
 namespace nesterov_a_test_task_processes_3 {
 
-class KulikovDiffCountNumberCharMPI : public BaseTask {
+class NesterovATestTaskMPI : public BaseTask {
  public:
   static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
     return ppc::task::TypeOfTask::kMPI;
   }
-  explicit KulikovDiffCountNumberCharMPI(const InType &in);
+  explicit NesterovATestTaskMPI(const InType &in);
 
  private:
   bool ValidationImpl() override;
