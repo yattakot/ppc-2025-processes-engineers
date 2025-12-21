@@ -53,6 +53,9 @@ bool KulikovDMatrixMultiplyMPI::RunImpl() {
 
   int base_rows = rows / size; // мин строк на процесс
   int remainder = rows % size;
+
+  int local_rows = base_rows + (rank < remainder ? 1 : 0);
+  int start_row = rank * base_rows + std::min(rank, remainder);
 }
 
 bool KulikovDMatrixMultiplyMPI::PostProcessingImpl() {
