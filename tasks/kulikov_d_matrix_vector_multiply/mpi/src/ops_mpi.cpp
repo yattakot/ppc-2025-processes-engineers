@@ -13,7 +13,6 @@ namespace kulikov_d_matrix_vector_multiply {
 KulikovDMatrixMultiplyMPI::KulikovDMatrixMultiplyMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
-  GetOutput() = 0;
 }
 
 bool KulikovDMatrixMultiplySEQ::ValidationImpl() {

@@ -11,7 +11,6 @@ namespace kulikov_d_matrix_vector_multiply {
 KulikovDMatrixMultiplySEQ::KulikovDMatrixMultiplySEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
-  GetOutput() = 0;
 }
 
 bool KulikovDMatrixMultiplySEQ::ValidationImpl() {
