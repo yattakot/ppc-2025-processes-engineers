@@ -23,32 +23,15 @@ namespace kulikov_d_matrix_vector_multiply {
 class KulikovMatrixMultiplyRunFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(const TestType &test_param) {
-    return std::to_string(std::get<0>(test_param)) + "_" + std::get<1>(test_param);
+    return std::get<1>(test_param);
   }
 
  protected:
   void SetUp() override {
-    int width = -1;
-    int height = -1;
-    int channels = -1;
-    std::vector<uint8_t> img;
-    // Read image in RGB to ensure consistent channel count
-    {
-      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_kulikov_d_matrix_vector_multiply, "pic.jpg");
-      auto *data = stbi_load(abs_path.c_str(), &width, &height, &channels, STBI_rgb);
-      if (data == nullptr) {
-        throw std::runtime_error("Failed to load image: " + std::string(stbi_failure_reason()));
-      }
-      channels = STBI_rgb;
-      img = std::vector<uint8_t>(data, data + (static_cast<ptrdiff_t>(width * height * channels)));
-      stbi_image_free(data);
-      if (std::cmp_not_equal(width, height)) {
-        throw std::runtime_error("width != height: ");
-      }
-    }
+    const auto& [type, _] =
+        std::get<static_cast<size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
 
-    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    input_data_ = width - height + std::min(std::accumulate(img.begin(), img.end(), 0), channels);
+    input_data_ = GenerateInput(type);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
@@ -58,9 +41,69 @@ class KulikovMatrixMultiplyRunFuncTests : public ppc::util::BaseRunFuncTests<InT
   InType GetTestInputData() final {
     return input_data_;
   }
+private:
+  static InType GenerateInput(MatrixType type) {
+    MatrixType input{};
+
+    switch (type) {
+      case MatrixType::kSingleConstant:
+        input.rows = 1;
+        input.cols = 1;
+        input.matrix = {5};
+        input.vector = {3};
+        break;
+
+      case MatrixType::kSingleRow:
+        input.rows = 1;
+        input.cols = 4;
+        input.matrix = {1, 2, 3, 4};
+        input.vector = {1, 1, 1, 1};
+        break;
+
+      case MatrixType::kSingleCol:
+        input.rows = 4;
+        input.cols = 1;
+        input.matrix = {1, 2, 3, 4};
+        input.vector = {2};
+        break;
+
+      case MatrixType::kSquare:
+        input.rows = 3;
+        input.cols = 3;
+        input.matrix = {
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9
+        };
+        input.vector = {1, 2, 3};
+        break;
+
+      case MatrixType::kAllZeros:
+        input.rows = 3;
+        input.cols = 3;
+        input.matrix.assign(9, 0);
+        input.vector.assign(3, 0);
+        break;
+
+      case MatrixType::kMixedSigns:
+        input.rows = 2;
+        input.cols = 3;
+        input.matrix = {
+            -1,  2, -3,
+             4, -5,  6
+        };
+        input.vector = {1, -1, 2};
+        break;
+
+      default:
+        throw std::runtime_error("Unsupported MatrixType");
+    }
+
+    return input;
+  }
 
  private:
-  InType input_data_ = 0;
+  InType input_data_;
 };
 
 namespace {

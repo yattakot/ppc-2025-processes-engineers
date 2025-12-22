@@ -15,7 +15,7 @@ KulikovDMatrixMultiplyMPI::KulikovDMatrixMultiplyMPI(const InType &in) {
   GetInput() = in;
 }
 
-bool KulikovDMatrixMultiplySEQ::ValidationImpl() {
+bool KulikovDMatrixMultiplyMPI::ValidationImpl() {
   const auto& input = GetInput();
 
   if (input.rows <= 0 || input.cols <= 0) {
