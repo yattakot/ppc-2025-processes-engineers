@@ -45,64 +45,54 @@ bool KulikovDMatrixMultiplyMPI::PreProcessingImpl() {
 }
 
 bool KulikovDMatrixMultiplyMPI::RunImpl() {
-  const auto& input = GetInput();
+    const auto& input = GetInput();
 
-  int size = 0;
-  int rank = 0;
+    int rank = 0, size = 0;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
+    int rows = input.rows;
+    int cols = input.cols;
 
-  int rows = input.rows;
-  int cols = input.cols;
+    std::vector<int> vec(input.vector);
+    MPI_Bcast(vec.data(), cols, MPI_INT, 0, MPI_COMM_WORLD);
 
-  int base_rows = rows / size; // мин строк на процесс
-  int remainder = rows % size;
+    int base_rows = rows / size;
+    int remainder = rows % size;
 
-  int local_rows = base_rows + (rank < remainder ? 1 : 0);
-  int start_row = rank * base_rows + std::min(rank, remainder);
+    int local_rows = base_rows + (rank < remainder ? 1 : 0);
+    int start_row = rank * base_rows + std::min(rank, remainder);
 
-  std::vector<int> local_result(local_rows, 0); // local result
+    std::vector<int> local_result(local_rows, 0);
 
-  for (int i = 0; i < local_rows; i++) { // multiply own feed
-    int global_row = start_row + i;
-    int sum = 0;
-
-    for (int j = 0; j < cols; j++) {
-      sum += input.matrix[global_row * cols + j] * input.vector[j];
+    for (int i = 0; i < local_rows; ++i) {
+        int sum = 0;
+        int global_row = start_row + i;
+        for (int j = 0; j < cols; ++j) {
+            sum += input.matrix[global_row * cols + j] * vec[j];
+        }
+        local_result[i] = sum;
     }
 
-    local_result[i] = sum;
-  }
+    std::vector<int> recv_counts(size, base_rows);
+    for (int p = 0; p < remainder; ++p) recv_counts[p] += 1;
 
+    std::vector<int> displs(size, 0);
+    for (int i = 1; i < size; ++i) displs[i] = displs[i-1] + recv_counts[i-1];
 
-  if (rank == 0) { // сборка результата на 0 процессе
-    for (int i = 0; i < local_rows; i++) {
-      GetOutput()[start_row + i] = local_result[i];
-    }
+    if (rank == 0) GetOutput().assign(rows, 0);
 
-    for (int p = 1; p < size; p++) {
-      int recv_rows = base_rows + (p < remainder ? 1 : 0);
-      int recv_start = p * base_rows + std::min(p, remainder);
+    MPI_Gatherv(local_result.data(),
+                local_rows,
+                MPI_INT,
+                GetOutput().data(),
+                recv_counts.data(),
+                displs.data(),
+                MPI_INT,
+                0,
+                MPI_COMM_WORLD);
 
-      MPI_Recv(GetOutput().data() + recv_start,
-               recv_rows,
-               MPI_INT,
-               p,
-               0,
-               MPI_COMM_WORLD,
-               MPI_STATUS_IGNORE);
-    }
-  } else {
-    MPI_Send(local_result.data(),
-             local_rows,
-             MPI_INT,
-             0,
-             0,
-             MPI_COMM_WORLD);
-  }
-
-  return true;
+    return true;
 }
 
 bool KulikovDMatrixMultiplyMPI::PostProcessingImpl() {

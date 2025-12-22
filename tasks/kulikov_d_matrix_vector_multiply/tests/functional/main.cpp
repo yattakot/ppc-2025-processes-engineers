@@ -1,9 +1,8 @@
-#pragma once
-
 #include <gtest/gtest.h>
 #include <vector>
 #include <tuple>
 #include <stdexcept>
+#include <mpi.h>
 
 #include "kulikov_d_matrix_vector_multiply/common/include/common.hpp"
 #include "kulikov_d_matrix_vector_multiply/mpi/include/ops_mpi.hpp"
@@ -18,15 +17,17 @@ public:
     static std::string PrintFuncTestName(
         const testing::TestParamInfo<ppc::util::FuncTestParam<InType, OutType, TestType>>& info)
     {
-        const auto& func_test_param = info.param;
-        const auto& test_case = std::get<2>(func_test_param);
-        return std::to_string(std::get<0>(test_case)) + "_" + std::get<1>(test_case);
+        const auto& test_param = std::get<2>(info.param);
+        const int case_id = std::get<0>(test_param);
+        const std::string& base_name = std::get<1>(test_param);
+
+        return std::to_string(case_id) + "_" + base_name + "_" + std::to_string(info.index);
     }
 
 protected:
     void SetUp() override {
-        const auto& func_test_param = GetParam();
-        const auto& test_case = std::get<2>(func_test_param);
+        const auto& param_tuple = GetParam();
+        const TestType& test_case = std::get<2>(param_tuple); // третий элемент
         int case_id = std::get<0>(test_case);
 
         switch (case_id) {
@@ -56,6 +57,9 @@ protected:
     }
 
     bool CheckTestOutputData(OutType &output_data) final {
+        int rank = 0;
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+        if (rank != 0) return true;
         return output_data == expected_;
     }
 
@@ -67,6 +71,10 @@ private:
     InType input_data_;
     OutType expected_;
 };
+
+TEST_P(KulikovMatrixMultiplyRunFuncTests, RunFunctionalTest) {
+    ExecuteTest(GetParam());
+}
 
 namespace {
 
