@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "kulikov_d_coun_number_char/common/include/common.hpp"
 
@@ -56,14 +57,14 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
 
   if (proc_rank_ == 0) {
     size_t offset = 0;
-    for (int i = 0; i < static_cast<int>(proc_size_); ++i) {
-      send_counts[i] = static_cast<int>(base + (i < static_cast<int>(rem) ? 1 : 0));
+    for (int i = 0; i < proc_size_; ++i) {
+      send_counts[i] = static_cast<int>(base + (std::cmp_less(i, rem) ? 1 : 0));
       displs[i] = static_cast<int>(offset);
       offset += send_counts[i];
     }
   }
 
-  const size_t local_size = base + (static_cast<size_t>(proc_rank_) < rem ? 1 : 0);
+  const size_t local_size = base + (std::cmp_less(proc_rank_, rem) ? 1 : 0);
   std::vector<char> local_s1(local_size);
   std::vector<char> local_s2(local_size);
 
