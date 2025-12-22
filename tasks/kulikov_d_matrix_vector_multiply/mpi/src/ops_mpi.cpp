@@ -54,17 +54,15 @@ bool KulikovDMatrixMultiplyMPI::RunImpl() {
     int rows = input.rows;
     int cols = input.cols;
 
-    std::vector<int> vec(input.vector);
+    std::vector<int> vec = input.vector;
     MPI_Bcast(vec.data(), cols, MPI_INT, 0, MPI_COMM_WORLD);
 
     int base_rows = rows / size;
     int remainder = rows % size;
-
     int local_rows = base_rows + (rank < remainder ? 1 : 0);
     int start_row = rank * base_rows + std::min(rank, remainder);
 
     std::vector<int> local_result(local_rows, 0);
-
     for (int i = 0; i < local_rows; ++i) {
         int sum = 0;
         int global_row = start_row + i;
