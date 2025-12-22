@@ -32,34 +32,50 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
   std::string s1;
   std::string s2;
 
+  size_t len1 = 0;
+  size_t len2 = 0;
+
   if (proc_rank_ == 0) {
     const auto &input = GetInput();
     s1 = input.first;
     s2 = input.second;
+    len1 = s1.size();
+    len2 = s2.size();
   }
-
-  size_t len1 = s1.size();
-  size_t len2 = s2.size();
   MPI_Bcast(&len1, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
   MPI_Bcast(&len2, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
-
-  s1.resize(len1);
-  s2.resize(len2);
-
-  MPI_Bcast(s1.data(), static_cast<int>(len1), MPI_CHAR, 0, MPI_COMM_WORLD);
-  MPI_Bcast(s2.data(), static_cast<int>(len2), MPI_CHAR, 0, MPI_COMM_WORLD);
 
   const size_t min_len = std::min(len1, len2);
   const size_t max_len = std::max(len1, len2);
 
   const size_t base = min_len / proc_size_;
   const size_t rem = min_len % proc_size_;
-  const size_t begin = (static_cast<size_t>(proc_rank_) * base) + std::min(static_cast<size_t>(proc_rank_), rem);
-  const size_t end = begin + base + (std::cmp_less(proc_rank_, rem) ? 1 : 0);
+
+  std::vector<int> send_counts(proc_size_);
+  std::vector<int> displs(proc_size_);
+
+  if (proc_rank_ == 0) {
+    size_t offset = 0;
+    for (int i = 0; i < static_cast<int>(proc_size_); ++i) {
+      send_counts[i] = static_cast<int>(base + (i < static_cast<int>(rem) ? 1 : 0));
+      displs[i] = static_cast<int>(offset);
+      offset += send_counts[i];
+    }
+  }
+
+  const size_t local_size = base + (proc_rank_ < rem ? 1 : 0);
+  std::vector<char> local_s1(local_size);
+  std::vector<char> local_s2(local_size);
+
+  MPI_Scatterv(proc_rank_ == 0 ? const_cast<char *>(s1.data()) : nullptr, send_counts.data(), displs.data(), MPI_CHAR,
+               local_s1.data(), static_cast<int>(local_size), MPI_CHAR, 0, MPI_COMM_WORLD);
+
+  MPI_Scatterv(proc_rank_ == 0 ? const_cast<char *>(s2.data()) : nullptr, send_counts.data(), displs.data(), MPI_CHAR,
+               local_s2.data(), static_cast<int>(local_size), MPI_CHAR, 0, MPI_COMM_WORLD);
 
   int local_diff = 0;
-  for (size_t i = begin; i < end; ++i) {
-    if (s1[i] != s2[i]) {
+  for (size_t i = 0; i < local_size; ++i) {
+    if (local_s1[i] != local_s2[i]) {
       local_diff++;
     }
   }
@@ -70,7 +86,6 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
   GetOutput() = global_diff + static_cast<int>(max_len - min_len);
   return true;
 }
-
 bool KulikovDiffCountNumberCharMPI::PostProcessingImpl() {
   return true;
 }
