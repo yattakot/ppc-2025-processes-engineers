@@ -63,7 +63,7 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
     }
   }
 
-  const size_t local_size = base + (proc_rank_ < rem ? 1 : 0);
+  const size_t local_size = base + (static_cast<size_t>(proc_rank_) < rem ? 1 : 0);
   std::vector<char> local_s1(local_size);
   std::vector<char> local_s2(local_size);
 
