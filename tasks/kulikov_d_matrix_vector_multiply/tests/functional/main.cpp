@@ -1,3 +1,5 @@
+#pragma once
+
 #include <gtest/gtest.h>
 #include <vector>
 #include <tuple>
@@ -13,16 +15,19 @@ namespace kulikov_d_matrix_vector_multiply {
 class KulikovMatrixMultiplyRunFuncTests
     : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
 public:
-    static std::string PrintFuncTestName(const TestType &test_param) {
-        return std::to_string(std::get<0>(test_param)) + "_" + std::get<1>(test_param);
+    static std::string PrintFuncTestName(
+        const testing::TestParamInfo<ppc::util::FuncTestParam<InType, OutType, TestType>>& info)
+    {
+        const auto& func_test_param = info.param;
+        const auto& test_case = std::get<2>(func_test_param);
+        return std::to_string(std::get<0>(test_case)) + "_" + std::get<1>(test_case);
     }
 
 protected:
     void SetUp() override {
-        // Получаем TestType из FuncTestParam
-        const auto& param_tuple = GetParam();                  // FuncTestParam
-        const TestType& test_param = std::get<2>(param_tuple); // третий элемент
-        int case_id = std::get<0>(test_param);
+        const auto& func_test_param = GetParam();
+        const auto& test_case = std::get<2>(func_test_param);
+        int case_id = std::get<0>(test_case);
 
         switch (case_id) {
             case 0:  // 1x1
@@ -65,25 +70,21 @@ private:
 
 namespace {
 
-// Список тестовых случаев
-const std::array<TestType, 5> kTestParams = { {
+const std::array<TestType, 5> kTestParams = {{
     std::make_tuple(0, std::string("Single")),
     std::make_tuple(1, std::string("SingleRow")),
     std::make_tuple(2, std::string("SingleCol")),
     std::make_tuple(3, std::string("Square")),
     std::make_tuple(4, std::string("Zeros"))
-} };
+}};
 
-// Создание задач MPI + SEQ
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<KulikovDMatrixMultiplyMPI, InType>(kTestParams, PPC_SETTINGS_kulikov_d_matrix_vector_multiply),
     ppc::util::AddFuncTask<KulikovDMatrixMultiplySEQ, InType>(kTestParams, PPC_SETTINGS_kulikov_d_matrix_vector_multiply)
 );
 
-// Преобразование в gtest-значения
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
-// Инстанцирование тестов
 INSTANTIATE_TEST_SUITE_P(
     MatrixVectorMultiply,
     KulikovMatrixMultiplyRunFuncTests,
