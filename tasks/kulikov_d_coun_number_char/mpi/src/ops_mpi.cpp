@@ -74,19 +74,11 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
   std::vector<char> local_s1(local_size);
   std::vector<char> local_s2(local_size);
 
-  MPI_Scatterv(
-    proc_rank_ == 0 ? const_cast<char*>(s1.data()) : nullptr,
-    send_counts.data(), displs.data(), MPI_CHAR,
-    local_s1.data(), static_cast<int>(local_size), MPI_CHAR,
-    0, MPI_COMM_WORLD
-  );
+  MPI_Scatterv(proc_rank_ == 0 ? const_cast<char *>(s1.data()) : nullptr, send_counts.data(), displs.data(), MPI_CHAR,
+               local_s1.data(), static_cast<int>(local_size), MPI_CHAR, 0, MPI_COMM_WORLD);
 
-  MPI_Scatterv(
-    proc_rank_ == 0 ? const_cast<char*>(s2.data()) : nullptr,
-    send_counts.data(), displs.data(), MPI_CHAR,
-    local_s2.data(), static_cast<int>(local_size), MPI_CHAR,
-    0, MPI_COMM_WORLD
-  );
+  MPI_Scatterv(proc_rank_ == 0 ? const_cast<char *>(s2.data()) : nullptr, send_counts.data(), displs.data(), MPI_CHAR,
+               local_s2.data(), static_cast<int>(local_size), MPI_CHAR, 0, MPI_COMM_WORLD);
 
   int local_diff = 0;
   for (size_t i = 0; i < local_size; ++i) {
