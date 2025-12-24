@@ -12,42 +12,26 @@
 
 namespace kulikov_d_matrix_vector_multiply {
 
-class KulikovMatrixMultiplyRunPerfTests
-    : public ppc::util::BaseRunPerfTests<InType, OutType> {
+class KulikovMatrixMultiplyRunPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
  protected:
   InType input_data_;
   std::vector<int> expected_data_;
 
   void SetUp() override {
-    const auto& param = GetParam();
+    const auto &param = GetParam();
+    const std::string &test_name = std::get<1>(param);
 
-    const std::string& test_name = std::get<1>(param);
-
-    const bool is_task_run =
-        test_name.find("task_run") != std::string::npos;
-
-    const bool is_mpi =
-        test_name.find("mpi") != std::string::npos;
+    const bool is_task_run = test_name.find("task_run") != std::string::npos;
 
     int rows = 0;
     int cols = 0;
 
-    if (is_mpi) {
-      if (is_task_run) {
-        rows = 800;
-        cols = 800;
-      } else {
-        rows = 2000;
-        cols = 2000;
-      }
+    if (is_task_run) {
+      rows = 300;
+      cols = 300;
     } else {
-      if (is_task_run) {
-        rows = 10;
-        cols = 10;
-      } else {
-        rows = 300;
-        cols = 300;
-      }
+      rows = 1000;
+      cols = 1000;
     }
 
     input_data_.rows = rows;
@@ -74,7 +58,7 @@ class KulikovMatrixMultiplyRunPerfTests
     }
   }
 
-  bool CheckTestOutputData(OutType& output_data) final {
+  bool CheckTestOutputData(OutType &output_data) final {
     int rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -104,21 +88,12 @@ TEST_P(KulikovMatrixMultiplyRunPerfTests, RunPerfModes) {
   ExecuteTest(GetParam());
 }
 
+const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<InType, KulikovDMatrixMultiplyMPI, KulikovDMatrixMultiplySEQ>(
+    PPC_SETTINGS_kulikov_d_matrix_vector_multiply);
 
-const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<
-        InType,
-        KulikovDMatrixMultiplyMPI,
-        KulikovDMatrixMultiplySEQ>(
-        PPC_SETTINGS_kulikov_d_matrix_vector_multiply);
+const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
-const auto kGtestValues =
-    ppc::util::TupleToGTestValues(kAllPerfTasks);
-
-INSTANTIATE_TEST_SUITE_P(
-    RunModeTests,
-    KulikovMatrixMultiplyRunPerfTests,
-    kGtestValues,
-    KulikovMatrixMultiplyRunPerfTests::CustomPerfTestName);
+INSTANTIATE_TEST_SUITE_P(RunModeTests, KulikovMatrixMultiplyRunPerfTests, kGtestValues,
+                         KulikovMatrixMultiplyRunPerfTests::CustomPerfTestName);
 
 }  // namespace kulikov_d_matrix_vector_multiply

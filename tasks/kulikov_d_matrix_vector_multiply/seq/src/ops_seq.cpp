@@ -14,7 +14,7 @@ KulikovDMatrixMultiplySEQ::KulikovDMatrixMultiplySEQ(const InType &in) {
 }
 
 bool KulikovDMatrixMultiplySEQ::ValidationImpl() {
-  const auto& input = GetInput();
+  const auto &input = GetInput();
 
   if (input.rows <= 0 || input.cols <= 0) {
     return false;
@@ -32,7 +32,7 @@ bool KulikovDMatrixMultiplySEQ::ValidationImpl() {
 }
 
 bool KulikovDMatrixMultiplySEQ::PreProcessingImpl() {
-  const auto& input = GetInput();
+  const auto &input = GetInput();
 
   GetOutput().assign(input.rows, 0);
 
@@ -40,8 +40,8 @@ bool KulikovDMatrixMultiplySEQ::PreProcessingImpl() {
 }
 
 bool KulikovDMatrixMultiplySEQ::RunImpl() {
-  const auto& input = GetInput();
-  auto& result = GetOutput();
+  const auto &input = GetInput();
+  auto &result = GetOutput();
 
   for (int i = 0; i < input.rows; i++) {
     int sum = 0;
