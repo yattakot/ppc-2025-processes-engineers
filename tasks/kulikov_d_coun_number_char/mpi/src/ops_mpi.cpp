@@ -56,8 +56,8 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
 
   if (proc_rank_ == 0) {
     size_t offset = 0;
-    for (int i = 0; i < static_cast<int>(proc_size_); ++i) {
-      send_counts[i] = static_cast<int>(base + (i < static_cast<int>(rem) ? 1 : 0));
+    for (int i = 0; i < proc_size_; ++i) {
+      send_counts[i] = static_cast<int>(base + (std::cmp_less(i, rem) ? 1 : 0));
       displs[i] = static_cast<int>(offset);
       offset += send_counts[i];
     }
@@ -66,10 +66,7 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
   MPI_Bcast(send_counts.data(), static_cast<int>(proc_size_), MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(displs.data(), static_cast<int>(proc_size_), MPI_INT, 0, MPI_COMM_WORLD);
 
-  const size_t local_size = base + (proc_rank_ < rem ? 1 : 0);
-  if (local_size > static_cast<size_t>(INT_MAX)) {
-    throw std::runtime_error("Local segment too large for MPI");
-  }
+  const size_t local_size = base + (std::cmp_less(proc_rank_, rem) ? 1 : 0);
 
   std::vector<char> local_s1(local_size);
   std::vector<char> local_s2(local_size);
