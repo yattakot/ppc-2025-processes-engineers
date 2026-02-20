@@ -63,8 +63,8 @@ bool KulikovDiffCountNumberCharMPI::RunImpl() {
     }
   }
 
-  MPI_Bcast(send_counts.data(), static_cast<int>(proc_size_), MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(displs.data(), static_cast<int>(proc_size_), MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(send_counts.data(), proc_size_, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(displs.data(), proc_size_, MPI_INT, 0, MPI_COMM_WORLD);
 
   const size_t local_size = base + (std::cmp_less(proc_rank_, rem) ? 1 : 0);
 
